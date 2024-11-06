@@ -1,0 +1,50 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+spec:
+  profile: default
+  values:
+    gateways:
+      istio-ingressgateway:
+        autoscaleEnabled: false
+  components:
+    pilot: 
+      k8s:
+        env:
+        # If enabled, Pilot will send only clusters 
+        # that referenced in gateway virtual services attached to gateway (improves gateway performance)
+        - name: PILOT_FILTER_GATEWAY_CLUSTER_CONFIG
+          value: "true"
+    # istio ingress gateways
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: false 
+    - name: first-ingress-gw
+      namespace: first
+      enabled: true
+      label:
+        istio: first-ingress-gw
+    - name: second-ingress-gw
+      namespace: second
+      enabled: true 
+      label:
+        istio: second-ingress-gw
+    # istio egress gateways
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: false 
+    - name: first-egress-gw
+      namespace: first
+      enabled: true
+      label:
+        istio: first-egress-gw
+    - name: second-egress-gw
+      namespace: second
+      enabled: true 
+      label:
+        istio: second-egress-gw
+  meshConfig:
+    defaultConfig:
+      proxyMetadata: 
+        ISTIO_META_DNS_CAPTURE: "true"
